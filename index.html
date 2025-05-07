@@ -533,7 +533,7 @@
                 this.y = Math.random() * currentCanvasHeight; 
                 this.originalX = this.x; this.originalY = this.y;
                 this.size = Math.random() * 1.8 + 0.8; 
-                this.baseOpacity = Math.random() * 0.2 + 0.05; 
+                this.baseOpacity = Math.random() * 0.3 + 0.15; // Increased brightness
                 this.currentOpacity = this.baseOpacity;
                 this.vx = (Math.random() - 0.5) * 0.15; 
                 this.vy = (Math.random() - 0.5) * 0.15; 
@@ -550,7 +550,7 @@
                         const force = (particleMouse.radius - distanceToMouse) / particleMouse.radius; 
                         dxMouse = forceDirectionX * force * particleRepulsionStrength;
                         dyMouse = forceDirectionY * force * particleRepulsionStrength;
-                        this.currentOpacity = Math.min(0.8, this.baseOpacity + (1 - distanceToMouse / particleMouse.radius) * 0.7); 
+                        this.currentOpacity = Math.min(0.9, this.baseOpacity + (1 - distanceToMouse / particleMouse.radius) * 0.7); // Increased max brightness
                     } else { this.currentOpacity = this.baseOpacity; }
                 } else { this.currentOpacity = this.baseOpacity; }
                 const springForceX = (this.originalX - this.x) * 0.0015; 
@@ -591,7 +591,7 @@
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     if (distance < particleConnectionDistance) {
                         const avgNodeOpacity = (particles[i].currentOpacity + particles[j].currentOpacity) / 2;
-                        const lineOpacity = Math.min(avgNodeOpacity * 0.8, (1 - distance / particleConnectionDistance) * 0.6); 
+                        const lineOpacity = Math.min(avgNodeOpacity * 0.9, (1 - distance / particleConnectionDistance) * 0.8); // Increased brightness
                         if (lineOpacity > 0.02) { 
                             particleCtx.beginPath(); particleCtx.moveTo(particles[i].x, particles[i].y);
                             particleCtx.lineTo(particles[j].x, particles[j].y);
@@ -908,7 +908,7 @@
         function showGame() {
             gameOverlay.style.display = 'flex';
             document.body.classList.add('game-active'); 
-            setupGameCanvasDimensions(); // Setup canvas dimensions when game is shown
+            setupGameCanvasDimensions(); 
             startGameButton.style.display = 'inline-block';
             restartGameButton.style.display = 'none';
             gameOverMessage.style.display = 'none';
@@ -1008,16 +1008,12 @@
                 animateParticles(); 
             }
             if (gameOverlay && gameOverlay.style.display === 'flex' && !gameOver) {
-                // If game is active and window resizes, re-setup canvas and re-init game
-                // This is a simple approach; more complex games might try to scale elements instead of full re-init
                 setupGameCanvasDimensions();
-                // Consider if initGame() should be called or just a redraw/element repositioning
-                // For simplicity, if game was running, a resize might just stop it and require restart.
-                // Or, if you want to try and continue:
-                // player.y = Math.min(player.y, gameCanvas.height - player.height); // Adjust player position
-                // drawGame(); // Redraw with new dimensions
-                // However, item positions would be off. A full re-init is safer for this game's current structure.
-                // For now, it will resize on next 'showGame' or 'initGame'
+                // Re-initialize game or adjust elements on resize while game is active
+                // For simplicity, current setup resizes canvas but might require restart
+                // To attempt continuation:
+                // player.y = Math.min(player.y, gameCanvas.height - player.height); 
+                // drawGame(); 
             }
         });
     });
