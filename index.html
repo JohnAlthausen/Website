@@ -162,6 +162,7 @@
             margin: 0 auto 20px auto; 
             border-radius: 5px;
             touch-action: none; /* Important for preventing default touch actions like scrolling on canvas */
+            /* width and height attributes are set by JS */
         }
         
         .game-button {
@@ -473,7 +474,7 @@
 
     <div id="game-overlay">
         <div id="game-container">
-            <h2 id="game-title">Cyber Guard</h2> <canvas id="gameCanvas" width="600" height="400"></canvas>
+            <h2 id="game-title">Cyber Guard</h2> <canvas id="gameCanvas"></canvas>
             <div id="score-display">Score: 0</div>
             <div id="game-over-message" style="display: none;">SYSTEM BREACH!</div> <button id="start-game-button" class="game-button">Initialize</button> <button id="restart-game-button" class="game-button" style="display: none;">Re-engage</button> <button id="close-game-button" class="game-button">Disengage</button> </div>
     </div>
@@ -658,6 +659,33 @@
         let playerInitialYOnTouch = 0;
         let isTouching = false;
 
+        function setupGameCanvasDimensions() {
+            const viewportWidth = window.innerWidth;
+            const containerMaxWidthPx = 700; 
+            const containerPercentage = 0.90; 
+
+            let targetContainerWidth = viewportWidth * containerPercentage;
+            if (targetContainerWidth > containerMaxWidthPx) {
+                targetContainerWidth = containerMaxWidthPx;
+            }
+            
+            const containerPadding = 50; 
+            let canvasEffectiveWidth = targetContainerWidth - containerPadding;
+            canvasEffectiveWidth = Math.max(150, canvasEffectiveWidth); 
+
+            const gameAspectRatio = 400 / 600; 
+
+            gameCanvas.width = canvasEffectiveWidth;
+            gameCanvas.height = canvasEffectiveWidth * gameAspectRatio;
+
+            const maxCanvasHeight = window.innerHeight * 0.75; 
+            if (gameCanvas.height > maxCanvasHeight) {
+                gameCanvas.height = maxCanvasHeight;
+                gameCanvas.width = gameCanvas.height / gameAspectRatio;
+            }
+        }
+
+
         function drawFirewall(ctx, x, y, width, height, color) {
             ctx.fillStyle = color;
             ctx.beginPath();
@@ -721,7 +749,7 @@
             }
 
             this.update = function() { 
-                if (!isTouching) { // Only apply keyboard velocity if not touching
+                if (!isTouching) { 
                     this.y += playerVelocityY;
                 }
                 if (this.y < 0) {
@@ -778,7 +806,7 @@
         };
 
         function handlePlayerMovement() {
-            if (isTouching) return; // Keyboard movement disabled during touch
+            if (isTouching) return; 
             playerVelocityY = 0; 
             if (keysPressed.ArrowUp || keysPressed.w) {
                 playerVelocityY = -playerBaseSpeed;
@@ -825,7 +853,7 @@
                         break; 
                     }
                 } else if (items[i].x + items[i].width < 0) {
-                    if (items[i].type === 'malware') { 
+                     if (items[i].type === 'malware') { 
                         gameOver = true; 
                         gameOverMessage.textContent = 'MALWARE MISSED!'; 
                         gameOverMessage.style.display = 'block';
@@ -879,17 +907,18 @@
         
         function showGame() {
             gameOverlay.style.display = 'flex';
-            document.body.classList.add('game-active'); // Lock body scroll
+            document.body.classList.add('game-active'); 
+            setupGameCanvasDimensions(); // Setup canvas dimensions when game is shown
             startGameButton.style.display = 'inline-block';
             restartGameButton.style.display = 'none';
             gameOverMessage.style.display = 'none';
             for (let key in keysPressed) keysPressed[key] = false;
-            isTouching = false; // Reset touch state
+            isTouching = false; 
         }
 
         function hideGame() {
             gameOverlay.style.display = 'none';
-            document.body.classList.remove('game-active'); // Unlock body scroll
+            document.body.classList.remove('game-active'); 
             if (gameLoopId) {
                 cancelAnimationFrame(gameLoopId);
             }
@@ -977,6 +1006,18 @@
                 cancelAnimationFrame(particleAnimationFrameId); 
                 resizeParticleCanvas(); 
                 animateParticles(); 
+            }
+            if (gameOverlay && gameOverlay.style.display === 'flex' && !gameOver) {
+                // If game is active and window resizes, re-setup canvas and re-init game
+                // This is a simple approach; more complex games might try to scale elements instead of full re-init
+                setupGameCanvasDimensions();
+                // Consider if initGame() should be called or just a redraw/element repositioning
+                // For simplicity, if game was running, a resize might just stop it and require restart.
+                // Or, if you want to try and continue:
+                // player.y = Math.min(player.y, gameCanvas.height - player.height); // Adjust player position
+                // drawGame(); // Redraw with new dimensions
+                // However, item positions would be off. A full re-init is safer for this game's current structure.
+                // For now, it will resize on next 'showGame' or 'initGame'
             }
         });
     });
