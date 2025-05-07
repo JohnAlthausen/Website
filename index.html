@@ -17,6 +17,9 @@
             color: #D1D5DB; 
             overflow-x: hidden; 
         }
+        body.game-active { /* Style to prevent scrolling when game is active */
+            overflow: hidden;
+        }
 
         .hero-section {
             height: 100vh;
@@ -158,6 +161,7 @@
             display: block; 
             margin: 0 auto 20px auto; 
             border-radius: 5px;
+            touch-action: none; /* Important for preventing default touch actions like scrolling on canvas */
         }
         
         .game-button {
@@ -475,6 +479,7 @@
     </div>
 
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
         const particleCanvas = document.getElementById('secureMatrixCanvas');
         const particleCtx = particleCanvas ? particleCanvas.getContext('2d') : null; 
         let particleAnimationFrameId;
@@ -649,6 +654,10 @@
         const malwareColor = '#FF4136';   
         const serverColor = '#0074D9';    
 
+        let touchStartY = 0;
+        let playerInitialYOnTouch = 0;
+        let isTouching = false;
+
         function drawFirewall(ctx, x, y, width, height, color) {
             ctx.fillStyle = color;
             ctx.beginPath();
@@ -712,14 +721,16 @@
             }
 
             this.update = function() { 
-                this.y += playerVelocityY;
+                if (!isTouching) { // Only apply keyboard velocity if not touching
+                    this.y += playerVelocityY;
+                }
                 if (this.y < 0) {
                     this.y = 0;
-                    playerVelocityY = 0; 
+                    if (!isTouching) playerVelocityY = 0; 
                 }
                 if (this.y + this.height > gameCanvas.height) {
                     this.y = gameCanvas.height - this.height;
-                    playerVelocityY = 0; 
+                    if (!isTouching) playerVelocityY = 0; 
                 }
             }
         }
@@ -767,6 +778,7 @@
         };
 
         function handlePlayerMovement() {
+            if (isTouching) return; // Keyboard movement disabled during touch
             playerVelocityY = 0; 
             if (keysPressed.ArrowUp || keysPressed.w) {
                 playerVelocityY = -playerBaseSpeed;
@@ -806,6 +818,7 @@
                         items.splice(i, 1); 
                     } else { 
                         gameOver = true;
+                        gameOverMessage.textContent = 'SYSTEM BREACH!'; 
                         gameOverMessage.style.display = 'block';
                         restartGameButton.style.display = 'inline-block';
                         startGameButton.style.display = 'none';
@@ -814,7 +827,7 @@
                 } else if (items[i].x + items[i].width < 0) {
                     if (items[i].type === 'malware') { 
                         gameOver = true; 
-                        gameOverMessage.textContent = 'MALWARE BREACH!'; 
+                        gameOverMessage.textContent = 'MALWARE MISSED!'; 
                         gameOverMessage.style.display = 'block';
                         restartGameButton.style.display = 'inline-block';
                         startGameButton.style.display = 'none';
@@ -866,14 +879,17 @@
         
         function showGame() {
             gameOverlay.style.display = 'flex';
+            document.body.classList.add('game-active'); // Lock body scroll
             startGameButton.style.display = 'inline-block';
             restartGameButton.style.display = 'none';
             gameOverMessage.style.display = 'none';
             for (let key in keysPressed) keysPressed[key] = false;
+            isTouching = false; // Reset touch state
         }
 
         function hideGame() {
             gameOverlay.style.display = 'none';
+            document.body.classList.remove('game-active'); // Unlock body scroll
             if (gameLoopId) {
                 cancelAnimationFrame(gameLoopId);
             }
@@ -885,7 +901,7 @@
         if (closeGameButton) closeGameButton.addEventListener('click', hideGame);
 
         document.addEventListener('keydown', (e) => {
-            if (gameOverlay.style.display !== 'flex' || gameOver) return;
+            if (gameOverlay.style.display !== 'flex' || gameOver || isTouching) return;
             if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') keysPressed.ArrowUp = true;
             if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') keysPressed.ArrowDown = true;
         });
@@ -894,6 +910,45 @@
             if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') keysPressed.ArrowUp = false;
             if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') keysPressed.ArrowDown = false;
         });
+
+        if (gameCanvas) {
+            gameCanvas.addEventListener('touchstart', function(e) {
+                if (gameOver || !player) return;
+                e.preventDefault(); 
+                isTouching = true;
+                const touch = e.touches[0];
+                const rect = gameCanvas.getBoundingClientRect();
+                touchStartY = touch.clientY - rect.top;
+                playerInitialYOnTouch = player.y;
+            }, { passive: false });
+
+            gameCanvas.addEventListener('touchmove', function(e) {
+                if (gameOver || !isTouching || !player) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = gameCanvas.getBoundingClientRect();
+                let currentTouchY = touch.clientY - rect.top;
+                let deltaY = currentTouchY - touchStartY;
+                
+                player.y = playerInitialYOnTouch + deltaY;
+
+                if (player.y < 0) player.y = 0;
+                if (player.y + player.height > gameCanvas.height) player.y = gameCanvas.height - player.height;
+
+            }, { passive: false });
+
+            gameCanvas.addEventListener('touchend', function(e) {
+                if (gameOver || !player) return;
+                e.preventDefault();
+                isTouching = false;
+            });
+             gameCanvas.addEventListener('touchcancel', function(e) {
+                if (gameOver || !player) return;
+                e.preventDefault();
+                isTouching = false;
+            });
+        }
+
 
         let clickCount = 0;
         let clickTimer = null;
@@ -912,20 +967,19 @@
             });
         }
         
-        window.addEventListener('load', () => {
-            if (particleCanvas) {
-                 resizeParticleCanvas(); 
-                 animateParticles();  
-            }
-        });
-         window.addEventListener('resize', () => {
+        if (particleCanvas) {
+            resizeParticleCanvas(); 
+            animateParticles();  
+        }
+        
+        window.addEventListener('resize', () => {
             if (particleCanvas) { 
                 cancelAnimationFrame(particleAnimationFrameId); 
                 resizeParticleCanvas(); 
                 animateParticles(); 
             }
         });
-
+    });
     </script>
 
 </body>
