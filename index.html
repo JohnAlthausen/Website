@@ -17,9 +17,88 @@
             color: #D1D5DB; 
             overflow-x: hidden; 
         }
-        body.game-active { /* Style to prevent scrolling when game is active */
+        body.loading {
+             overflow: hidden; /* Prevent scroll during loading */
+        }
+        body.game-active { 
             overflow: hidden;
         }
+
+        /* Loading Overlay Styles */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            z-index: 2000; /* Highest */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            opacity: 1;
+            transition: opacity 0.5s ease-out 2.5s; /* Fade out after delay */
+        }
+        #loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #loadingCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2001;
+        }
+        #loading-text {
+            z-index: 2002;
+            font-family: 'Press Start 2P', cursive;
+            color: #CCA43B; /* Gold color */
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px #CCA43B;
+            opacity: 1;
+            transition: opacity 0.3s ease-out 2.2s; /* Fade out text slightly before overlay */
+        }
+         #loading-text.hidden {
+             opacity: 0;
+         }
+
+        /* Mask Transition Styles */
+        #mask-left, #mask-right {
+            position: fixed;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background-color: #050505; /* Slightly off-black */
+            z-index: 1500; /* Below loading, above content */
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1); /* Smooth ease out */
+        }
+        #mask-left {
+            left: 0;
+            transform: translateX(0);
+        }
+        #mask-right {
+            right: 0;
+            transform: translateX(0);
+        }
+        body.loaded #mask-left {
+            transform: translateX(-100%);
+        }
+        body.loaded #mask-right {
+            transform: translateX(100%);
+        }
+
+        /* Main Content Wrapper */
+        #main-content-wrapper {
+             opacity: 0; /* Initially hidden */
+             transition: opacity 0.1s linear 2.8s; /* Fade in slightly after mask starts moving */
+        }
+        body.loaded #main-content-wrapper {
+            opacity: 1;
+        }
+
 
         .hero-section {
             height: 100vh;
@@ -161,8 +240,7 @@
             display: block; 
             margin: 0 auto 20px auto; 
             border-radius: 5px;
-            touch-action: none; /* Important for preventing default touch actions like scrolling on canvas */
-            /* width and height attributes are set by JS */
+            touch-action: none; 
         }
         
         .game-button {
@@ -213,266 +291,274 @@
         }
     </style>
 </head>
-<body class="antialiased">
+<body class="antialiased loading"> <div id="loading-overlay">
+        <canvas id="loadingCanvas"></canvas>
+        <div id="loading-text">Initializing Systems...</div>
+    </div>
 
-    <header class="fixed top-0 left-0 right-0 z-20 bg-black/70 backdrop-filter backdrop-blur-md border-b border-gray-800/50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex-shrink-0">
-                    <a href="#hero" class="text-2xl font-bold text-white"> John <span class="text-gold">Althausen</span>
+    <div id="mask-left"></div>
+    <div id="mask-right"></div>
+
+    <div id="main-content-wrapper">
+
+        <header class="fixed top-0 left-0 right-0 z-20 bg-black/70 backdrop-filter backdrop-blur-md border-b border-gray-800/50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex-shrink-0">
+                        <a href="#hero" class="text-2xl font-bold text-white"> John <span class="text-gold">Althausen</span>
+                        </a>
+                    </div>
+                    <nav class="hidden md:flex md:items-center md:space-x-8">
+                        <a href="#about-me" class="header-link text-sm font-medium transition-colors">About Me</a>
+                        <a href="#experience" class="header-link text-sm font-medium transition-colors">Experience</a>
+                        <a href="#skills" class="header-link text-sm font-medium transition-colors">Skills</a>
+                        <a href="#projects" class="header-link text-sm font-medium transition-colors">Projects</a>
+                        <a href="#contact" class="header-link text-sm font-medium transition-colors">Contact</a>
+                    </nav>
+                    <div class="flex items-center space-x-3">
+                        <a href="#contact" class="btn-primary-gold py-2 px-4 rounded-md text-sm">Contact Me</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section id="hero" class="hero-section">
+            <canvas id="secureMatrixCanvas"></canvas> 
+            <div class="content-z container mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight text-gray-100">
+                    John Althausen
+                </h1>
+                <p class="text-2xl md:text-3xl gradient-text-gold font-semibold mb-8 max-w-2xl mx-auto">
+                    Security <span id="game-trigger">Operations</span> Center Analyst (SOC Analyst)
+                </p>
+                <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-3xl mx-auto">
+                    Motivated and diligent professional dedicated to continuous education and self-improvement. Proficient in leveraging Microsoft products and diverse computer software to enhance user experiences. Eager to contribute to team achievements through meticulous attention to detail and a strong work ethic.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#experience" class="btn-primary-gold py-3 px-8 rounded-lg text-base w-full sm:w-auto">
+                        View My Experience
+                    </a>
+                    <a href="John Althausen Federal Resume.pdf" class="btn-secondary-outline py-3 px-8 rounded-lg text-base w-full sm:w-auto" target="_blank" rel="noopener noreferrer">
+                        Download Resume
                     </a>
                 </div>
-                <nav class="hidden md:flex md:items-center md:space-x-8">
-                    <a href="#about-me" class="header-link text-sm font-medium transition-colors">About Me</a>
-                    <a href="#experience" class="header-link text-sm font-medium transition-colors">Experience</a>
-                    <a href="#skills" class="header-link text-sm font-medium transition-colors">Skills</a>
-                    <a href="#projects" class="header-link text-sm font-medium transition-colors">Projects</a>
-                    <a href="#contact" class="header-link text-sm font-medium transition-colors">Contact</a>
-                </nav>
-                <div class="flex items-center space-x-3">
-                    <a href="#contact" class="btn-primary-gold py-2 px-4 rounded-md text-sm">Contact Me</a>
-                </div>
             </div>
-        </div>
-    </header>
+        </section>
 
-    <section id="hero" class="hero-section">
-        <canvas id="secureMatrixCanvas"></canvas> 
-        <div class="content-z container mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight text-gray-100">
-                John Althausen
-            </h1>
-            <p class="text-2xl md:text-3xl gradient-text-gold font-semibold mb-8 max-w-2xl mx-auto">
-                 Security <span id="game-trigger">Operations</span> Center Analyst (SOC Analyst)
-            </p>
-            <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-3xl mx-auto">
-                Motivated and diligent professional dedicated to continuous education and self-improvement. Proficient in leveraging Microsoft products and diverse computer software to enhance user experiences. Eager to contribute to team achievements through meticulous attention to detail and a strong work ethic.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <a href="#experience" class="btn-primary-gold py-3 px-8 rounded-lg text-base w-full sm:w-auto">
-                    View My Experience
-                </a>
-                <a href="John Althausen Federal Resume.pdf" class="btn-secondary-outline py-3 px-8 rounded-lg text-base w-full sm:w-auto" target="_blank" rel="noopener noreferrer">
-                    Download Resume
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <section id="about-me" class="py-16 sm:py-24 bg-black relative z-10 section-placeholder">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
-                About <span class="text-gold">Me</span>
-            </h2>
-            <div class="glassmorphic-panel-dark p-6 sm:p-8 lg:p-10 max-w-3xl mx-auto">
-                <p class="text-gray-300 text-lg mb-4">
-                    I am a motivated and diligent professional dedicated to continuous education and self-improvement. Proficient in leveraging Microsoft products and diverse computer software to enhance user experiences, I am recognized for consistently surpassing expectations and providing exceptional support to staff.
-                </p>
-                <p class="text-gray-300 text-lg mb-4">
-                    My background includes achieving the top of my cybersecurity and digital forensics class during the National Cyber League Competition. I am skilled in utilizing tools for packet analysis, network traffic forensics, and ensuring system security. I am eager to contribute to team achievements through meticulous attention to detail, a strong work ethic, and exceptional organizational abilities.
-                </p>
-                <p class="text-gray-300 text-lg">
-                    With experience in help desk support and now as a Security Operations Center Analyst at Edgewater Federal Solutions, I am committed to continuous learning, personal growth, and striving for professional excellence in the cybersecurity field.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section id="experience" class="py-16 sm:py-24 bg-gray-950 relative z-10 section-placeholder">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
-                Professional <span class="text-gold">Experience</span>
-            </h2>
-            <div class="space-y-12">
-                <div class="glassmorphic-panel-dark p-6 sm:p-8">
-                    <h3 class="text-2xl font-semibold text-gold mb-2">Security Operations Center Analyst</h3>
-                    <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Full-time)</p>
-                    <p class="text-sm text-gray-500 mb-1">Jun 2024 - Present</p>
-                    <p class="text-sm text-gray-500 mb-4">Oak Ridge, Tennessee, United States · Hybrid</p>
-                    <ul class="list-disc list-inside text-gray-400 space-y-2">
-                        <li>Monitor security events and alerts using SIEM tools (Splunk, Elasticsearch) and XDR platforms (Crowdstrike Falcon, Palo Alto Networks Cortex).</li>
-                        <li>Conduct vulnerability assessments and contribute to IT security policy enforcement.</li>
-                        <li>Analyze security incidents, perform data monitoring, and assist in incident response activities.</li>
-                        <li>Collaborate with team members to enhance security posture and maintain comprehensive IT documentation.</li>
-                        <li>Utilize skills in HSPD-12 compliance, security operations, and troubleshooting to protect organizational assets.</li>
-                        <li>Implement zero trust methodologies on network printers and other devices.</li>
-                    </ul>
-                </div>
-                <div class="glassmorphic-panel-dark p-6 sm:p-8">
-                    <h3 class="text-2xl font-semibold text-gold mb-2">Help Desk Support</h3>
-                    <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Full-time)</p>
-                    <p class="text-sm text-gray-500 mb-1">Jul 2023 - Jun 2024 (1 yr)</p>
-                    <p class="text-sm text-gray-500 mb-4">On-site</p>
-                    <ul class="list-disc list-inside text-gray-400 space-y-2">
-                        <li>Provided exceptional customer service, addressing client concerns promptly and ensuring satisfaction.</li>
-                        <li>Diagnosed and resolved technical problems efficiently using critical thinking and analytical skills.</li>
-                        <li>Installed and configured computer hardware components and software applications.</li>
-                        <li>Administered Adobe software solutions, including installation, updates, and troubleshooting.</li>
-                        <li>Created and deployed Windows images for standardized workstation setups.</li>
-                        <li>Administered the Alloy ticketing system, promptly addressing and resolving user issues.</li>
-                        <li>Created updated Windows images integrated with the latest patches to mitigate security risks.</li>
-                        <li>Installed and administered CrowdStrike antivirus software.</li>
-                        <li>Mentored interns in imaging processes, security protocols, and networking fundamentals.</li>
-                        <li>Utilized skills in Proofpoint, Smart Cards, and IT security policies.</li>
-                    </ul>
-                </div>
-                <div class="glassmorphic-panel-dark p-6 sm:p-8">
-                    <h3 class="text-2xl font-semibold text-gold mb-2">Information Science Specialist - Archivist Support / Help Desk Support</h3>
-                    <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Contract)</p>
-                    <p class="text-sm text-gray-500 mb-1">May 2023 - Jun 2023 (2 mos)</p>
-                    <p class="text-sm text-gray-500 mb-4">Oak Ridge, Tennessee, United States · On-site</p>
-                     <ul class="list-disc list-inside text-gray-400 space-y-2">
-                        <li>Provided technical support for information science and archival systems.</li>
-                        <li>Assisted users with help desk inquiries, troubleshooting specialized software and databases.</li>
-                        <li>Contributed to the maintenance and organization of digital archives.</li>
-                        <li>Applied skills in Proofpoint, IT security policies, and customer service.</li>
-                    </ul>
-                </div>
-                <div class="glassmorphic-panel-dark p-6 sm:p-8">
-                    <h3 class="text-2xl font-semibold text-gold mb-2">IT Support Specialist Intern</h3>
-                    <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Part-time)</p>
-                    <p class="text-sm text-gray-500 mb-1">Feb 2023 - Apr 2023 (3 mos)</p>
-                    <p class="text-sm text-gray-500 mb-4">Tennessee, United States · On-site</p>
-                    <ul class="list-disc list-inside text-gray-400 space-y-2">
-                        <li>Gained hands-on experience in IT support, including hardware and software troubleshooting.</li>
-                        <li>Assisted with desktop imaging and deployment.</li>
-                        <li>Learned about network security protocols and practices.</li>
-                        <li>Developed interpersonal communication and problem-solving skills.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="skills" class="py-16 sm:py-24 bg-black relative z-10 section-placeholder">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
-                Technical <span class="text-gold">Skills & Certifications</span>
-            </h2>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="glassmorphic-panel-dark p-6">
-                    <h3 class="text-xl font-semibold text-gold mb-3">Cybersecurity & SOC</h3>
-                    <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
-                        <li>Security Information and Event Management (SIEM): Splunk, Elasticsearch, Wazuh</li>
-                        <li>Extended Detection & Response (XDR): Palo Alto Networks Cortex</li>
-                        <li>Endpoint Security: Crowdstrike Falcon</li>
-                        <li>Vulnerability Assessment & Management</li>
-                        <li>Security Monitoring & Data Monitoring</li>
-                        <li>Network Packet Analysis: Wireshark, Network Miner, Tcpdump, Snort</li>
-                        <li>Zero Trust Implementation</li>
-                        <li>IT Security Policies & Procedures</li>
-                        <li>HSPD-12 Compliance</li>
-                        <li>Security Operations</li>
-                    </ul>
-                </div>
-                <div class="glassmorphic-panel-dark p-6">
-                    <h3 class="text-xl font-semibold text-gold mb-3">IT Support & Systems Admin</h3>
-                    <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
-                        <li>Help Desk & Ticketing Systems (Alloy)</li>
-                        <li>Windows Image Creation & Deployment</li>
-                        <li>Computer Hardware Installation & Troubleshooting</li>
-                        <li>Software Installation & Troubleshooting</li>
-                        <li>Adobe Administration</li>
-                        <li>Microsoft Products Proficiency</li>
-                        <li>DNS Server Management</li>
-                        <li>Secure Proxy Configuration</li>
-                        <li>Proofpoint Email Security</li>
-                        <li>Smart Card Technology</li>
-                        <li>Technical Documentation & IT Documentation</li>
-                    </ul>
-                </div>
-                <div class="glassmorphic-panel-dark p-6">
-                    <h3 class="text-xl font-semibold text-gold mb-3">Certifications</h3>
-                    <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
-                        <li>TestOut PC Pro Certification</li>
-                        <li>TestOut Security Pro Certification</li>
-                        <li>TestOut Network Pro Certification</li>
-                        <li>Pursuing CompTIA Security+</li>
-                    </ul>
-                    <h3 class="text-xl font-semibold text-gold mb-3 mt-4">Professional Skills</h3>
-                     <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
-                        <li>Problem Solving & Troubleshooting</li>
-                        <li>Customer Service</li>
-                        <li>Collaboration & Teamwork</li>
-                        <li>Interpersonal Communication</li>
-                        <li>Organization Skills</li>
-                        <li>Conflict Resolution</li>
-                        <li>Time Management</li>
-                        <li>Mentoring & Training</li>
-                    </ul>
-                     <h3 class="text-xl font-semibold text-gold mb-3 mt-4">Accomplishments</h3>
-                     <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
-                        <li>Top of class in National Cyber League Competition</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="projects" class="py-16 sm:py-24 bg-gray-950 relative z-10 section-placeholder">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
-                My <span class="text-gold">Projects</span>
-            </h2>
-            <div class="text-center text-gray-400 mb-8">
-                <p>Details of specific personal or academic projects can be discussed further. My professional experience involves practical application of security measures and system administration.</p>
-            </div>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="glassmorphic-panel-dark p-6 sm:p-8">
-                    <h3 class="text-2xl font-semibold text-gold mb-3">Home Lab Security & Network Setup</h3>
-                    <p class="text-gray-400 text-sm mb-4">
-                        Designed and implemented a comprehensive security and network infrastructure in a home lab environment. This included deploying Wazuh (XDR/SIEM) for threat detection, configuring a DNS server for ad/tracker blocking and custom filtering, and setting up a secure proxy for enhanced device security and network monitoring.
+        <section id="about-me" class="py-16 sm:py-24 bg-black relative z-10 section-placeholder">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
+                    About <span class="text-gold">Me</span>
+                </h2>
+                <div class="glassmorphic-panel-dark p-6 sm:p-8 lg:p-10 max-w-3xl mx-auto">
+                    <p class="text-gray-300 text-lg mb-4">
+                        I am a motivated and diligent professional dedicated to continuous education and self-improvement. Proficient in leveraging Microsoft products and diverse computer software to enhance user experiences, I am recognized for consistently surpassing expectations and providing exceptional support to staff.
                     </p>
-                    <p class="text-gray-500 text-xs mb-3">Technologies: Wazuh, DNS (Pi-hole or similar), Proxy Servers (e.g., Squid), Virtualization (VMware/VirtualBox), Linux OS</p>
-                </div>
-                <div class="glassmorphic-panel-dark p-6 sm:p-8">
-                    <h3 class="text-2xl font-semibold text-gold mb-3">Network Traffic Analysis & IDS Implementation</h3>
-                    <p class="text-gray-400 text-sm mb-4">
-                        Conducted in-depth network traffic analysis exercises using tools like Wireshark and Tcpdump to identify anomalies, detect potential intrusions, and understand network protocols. Implemented and configured Snort (IDS) to monitor network traffic for malicious activity based on defined rule sets during educational and personal projects.
+                    <p class="text-gray-300 text-lg mb-4">
+                        My background includes achieving the top of my cybersecurity and digital forensics class during the National Cyber League Competition. I am skilled in utilizing tools for packet analysis, network traffic forensics, and ensuring system security. I am eager to contribute to team achievements through meticulous attention to detail, a strong work ethic, and exceptional organizational abilities.
                     </p>
-                    <p class="text-gray-500 text-xs mb-3">Technologies: Wireshark, Snort, Tcpdump, Network Miner, Various Network Protocols</p>
+                    <p class="text-gray-300 text-lg">
+                        With experience in help desk support and now as a Security Operations Center Analyst at Edgewater Federal Solutions, I am committed to continuous learning, personal growth, and striving for professional excellence in the cybersecurity field.
+                    </p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="contact" class="py-16 sm:py-24 bg-black relative z-10 section-placeholder"> 
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
-                Get In <span class="text-gold">Touch</span>
-            </h2>
-            <div class="glassmorphic-panel-dark p-8 sm:p-10 max-w-xl mx-auto text-center">
-                <p class="text-lg text-gray-300 mb-6">
-                    I'm always open to discussing new opportunities, projects, or collaborations. Feel free to reach out!
-                </p>
-                <p class="text-xl text-gold font-semibold mb-2">
-                    <a href="mailto:JohnAlthausen@protonmail.com" class="hover:underline">JohnAlthausen@protonmail.com</a>
-                </p>
-                 <p class="text-lg text-gray-300 mb-6">
-                    <a href="tel:626-646-9723" class="hover:underline">(626) 646-9723</a>
-                </p>
-                <div class="flex justify-center space-x-6 mt-6">
-                    <a href="https://www.linkedin.com/in/johnalthausen/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gold transition-colors" aria-label="LinkedIn Profile">
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clip-rule="evenodd"/></svg>
-                        <span class="sr-only">LinkedIn</span>
-                    </a>
-                    <a href="[your-github-url]" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gold transition-colors" aria-label="GitHub Profile">
-                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg>
-                        <span class="sr-only">GitHub</span>
-                    </a>
+        <section id="experience" class="py-16 sm:py-24 bg-gray-950 relative z-10 section-placeholder">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
+                    Professional <span class="text-gold">Experience</span>
+                </h2>
+                <div class="space-y-12">
+                    <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                        <h3 class="text-2xl font-semibold text-gold mb-2">Security Operations Center Analyst</h3>
+                        <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Full-time)</p>
+                        <p class="text-sm text-gray-500 mb-1">Jun 2024 - Present</p>
+                        <p class="text-sm text-gray-500 mb-4">Oak Ridge, Tennessee, United States · Hybrid</p>
+                        <ul class="list-disc list-inside text-gray-400 space-y-2">
+                            <li>Monitor security events and alerts using SIEM tools (Splunk, Elasticsearch) and XDR platforms (Crowdstrike Falcon, Palo Alto Networks Cortex).</li>
+                            <li>Conduct vulnerability assessments and contribute to IT security policy enforcement.</li>
+                            <li>Analyze security incidents, perform data monitoring, and assist in incident response activities.</li>
+                            <li>Collaborate with team members to enhance security posture and maintain comprehensive IT documentation.</li>
+                            <li>Utilize skills in HSPD-12 compliance, security operations, and troubleshooting to protect organizational assets.</li>
+                            <li>Implement zero trust methodologies on network printers and other devices.</li>
+                        </ul>
+                    </div>
+                    <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                        <h3 class="text-2xl font-semibold text-gold mb-2">Help Desk Support</h3>
+                        <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Full-time)</p>
+                        <p class="text-sm text-gray-500 mb-1">Jul 2023 - Jun 2024 (1 yr)</p>
+                        <p class="text-sm text-gray-500 mb-4">On-site</p>
+                        <ul class="list-disc list-inside text-gray-400 space-y-2">
+                            <li>Provided exceptional customer service, addressing client concerns promptly and ensuring satisfaction.</li>
+                            <li>Diagnosed and resolved technical problems efficiently using critical thinking and analytical skills.</li>
+                            <li>Installed and configured computer hardware components and software applications.</li>
+                            <li>Administered Adobe software solutions, including installation, updates, and troubleshooting.</li>
+                            <li>Created and deployed Windows images for standardized workstation setups.</li>
+                            <li>Administered the Alloy ticketing system, promptly addressing and resolving user issues.</li>
+                            <li>Created updated Windows images integrated with the latest patches to mitigate security risks.</li>
+                            <li>Installed and administered CrowdStrike antivirus software.</li>
+                            <li>Mentored interns in imaging processes, security protocols, and networking fundamentals.</li>
+                            <li>Utilized skills in Proofpoint, Smart Cards, and IT security policies.</li>
+                        </ul>
+                    </div>
+                    <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                        <h3 class="text-2xl font-semibold text-gold mb-2">Information Science Specialist - Archivist Support / Help Desk Support</h3>
+                        <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Contract)</p>
+                        <p class="text-sm text-gray-500 mb-1">May 2023 - Jun 2023 (2 mos)</p>
+                        <p class="text-sm text-gray-500 mb-4">Oak Ridge, Tennessee, United States · On-site</p>
+                        <ul class="list-disc list-inside text-gray-400 space-y-2">
+                            <li>Provided technical support for information science and archival systems.</li>
+                            <li>Assisted users with help desk inquiries, troubleshooting specialized software and databases.</li>
+                            <li>Contributed to the maintenance and organization of digital archives.</li>
+                            <li>Applied skills in Proofpoint, IT security policies, and customer service.</li>
+                        </ul>
+                    </div>
+                    <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                        <h3 class="text-2xl font-semibold text-gold mb-2">IT Support Specialist Intern</h3>
+                        <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Part-time)</p>
+                        <p class="text-sm text-gray-500 mb-1">Feb 2023 - Apr 2023 (3 mos)</p>
+                        <p class="text-sm text-gray-500 mb-4">Tennessee, United States · On-site</p>
+                        <ul class="list-disc list-inside text-gray-400 space-y-2">
+                            <li>Gained hands-on experience in IT support, including hardware and software troubleshooting.</li>
+                            <li>Assisted with desktop imaging and deployment.</li>
+                            <li>Learned about network security protocols and practices.</li>
+                            <li>Developed interpersonal communication and problem-solving skills.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <footer class="py-12 bg-black border-t border-gray-800/50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-            <p>&copy; <script>document.write(new Date().getFullYear())</script> John Althausen. All Rights Reserved.</p>
-            <p class="text-xs mt-2">Powered by motivation and a passion for technology.</p>
-        </div>
-    </footer>
+        <section id="skills" class="py-16 sm:py-24 bg-black relative z-10 section-placeholder">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
+                    Technical <span class="text-gold">Skills & Certifications</span>
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="glassmorphic-panel-dark p-6">
+                        <h3 class="text-xl font-semibold text-gold mb-3">Cybersecurity & SOC</h3>
+                        <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                            <li>Security Information and Event Management (SIEM): Splunk, Elasticsearch, Wazuh</li>
+                            <li>Extended Detection & Response (XDR): Palo Alto Networks Cortex</li>
+                            <li>Endpoint Security: Crowdstrike Falcon</li>
+                            <li>Vulnerability Assessment & Management</li>
+                            <li>Security Monitoring & Data Monitoring</li>
+                            <li>Network Packet Analysis: Wireshark, Network Miner, Tcpdump, Snort</li>
+                            <li>Zero Trust Implementation</li>
+                            <li>IT Security Policies & Procedures</li>
+                            <li>HSPD-12 Compliance</li>
+                            <li>Security Operations</li>
+                        </ul>
+                    </div>
+                    <div class="glassmorphic-panel-dark p-6">
+                        <h3 class="text-xl font-semibold text-gold mb-3">IT Support & Systems Admin</h3>
+                        <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                            <li>Help Desk & Ticketing Systems (Alloy)</li>
+                            <li>Windows Image Creation & Deployment</li>
+                            <li>Computer Hardware Installation & Troubleshooting</li>
+                            <li>Software Installation & Troubleshooting</li>
+                            <li>Adobe Administration</li>
+                            <li>Microsoft Products Proficiency</li>
+                            <li>DNS Server Management</li>
+                            <li>Secure Proxy Configuration</li>
+                            <li>Proofpoint Email Security</li>
+                            <li>Smart Card Technology</li>
+                            <li>Technical Documentation & IT Documentation</li>
+                        </ul>
+                    </div>
+                    <div class="glassmorphic-panel-dark p-6">
+                        <h3 class="text-xl font-semibold text-gold mb-3">Certifications</h3>
+                        <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                            <li>TestOut PC Pro Certification</li>
+                            <li>TestOut Security Pro Certification</li>
+                            <li>TestOut Network Pro Certification</li>
+                            <li>Pursuing CompTIA Security+</li>
+                        </ul>
+                        <h3 class="text-xl font-semibold text-gold mb-3 mt-4">Professional Skills</h3>
+                        <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                            <li>Problem Solving & Troubleshooting</li>
+                            <li>Customer Service</li>
+                            <li>Collaboration & Teamwork</li>
+                            <li>Interpersonal Communication</li>
+                            <li>Organization Skills</li>
+                            <li>Conflict Resolution</li>
+                            <li>Time Management</li>
+                            <li>Mentoring & Training</li>
+                        </ul>
+                        <h3 class="text-xl font-semibold text-gold mb-3 mt-4">Accomplishments</h3>
+                        <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                            <li>Top of class in National Cyber League Competition</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <div id="game-overlay">
+        <section id="projects" class="py-16 sm:py-24 bg-gray-950 relative z-10 section-placeholder">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
+                    My <span class="text-gold">Projects</span>
+                </h2>
+                <div class="text-center text-gray-400 mb-8">
+                    <p>Details of specific personal or academic projects can be discussed further. My professional experience involves practical application of security measures and system administration.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                        <h3 class="text-2xl font-semibold text-gold mb-3">Home Lab Security & Network Setup</h3>
+                        <p class="text-gray-400 text-sm mb-4">
+                            Designed and implemented a comprehensive security and network infrastructure in a home lab environment. This included deploying Wazuh (XDR/SIEM) for threat detection, configuring a DNS server for ad/tracker blocking and custom filtering, and setting up a secure proxy for enhanced device security and network monitoring.
+                        </p>
+                        <p class="text-gray-500 text-xs mb-3">Technologies: Wazuh, DNS (Pi-hole or similar), Proxy Servers (e.g., Squid), Virtualization (VMware/VirtualBox), Linux OS</p>
+                    </div>
+                    <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                        <h3 class="text-2xl font-semibold text-gold mb-3">Network Traffic Analysis & IDS Implementation</h3>
+                        <p class="text-gray-400 text-sm mb-4">
+                            Conducted in-depth network traffic analysis exercises using tools like Wireshark and Tcpdump to identify anomalies, detect potential intrusions, and understand network protocols. Implemented and configured Snort (IDS) to monitor network traffic for malicious activity based on defined rule sets during educational and personal projects.
+                        </p>
+                        <p class="text-gray-500 text-xs mb-3">Technologies: Wireshark, Snort, Tcpdump, Network Miner, Various Network Protocols</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-16 sm:py-24 bg-black relative z-10 section-placeholder"> 
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
+                    Get In <span class="text-gold">Touch</span>
+                </h2>
+                <div class="glassmorphic-panel-dark p-8 sm:p-10 max-w-xl mx-auto text-center">
+                    <p class="text-lg text-gray-300 mb-6">
+                        I'm always open to discussing new opportunities, projects, or collaborations. Feel free to reach out!
+                    </p>
+                    <p class="text-xl text-gold font-semibold mb-2">
+                        <a href="mailto:JohnAlthausen@protonmail.com" class="hover:underline">JohnAlthausen@protonmail.com</a>
+                    </p>
+                    <p class="text-lg text-gray-300 mb-6">
+                        <a href="tel:626-646-9723" class="hover:underline">(626) 646-9723</a>
+                    </p>
+                    <div class="flex justify-center space-x-6 mt-6">
+                        <a href="https://www.linkedin.com/in/johnalthausen/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gold transition-colors" aria-label="LinkedIn Profile">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clip-rule="evenodd"/></svg>
+                            <span class="sr-only">LinkedIn</span>
+                        </a>
+                        <a href="[your-github-url]" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gold transition-colors" aria-label="GitHub Profile">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg>
+                            <span class="sr-only">GitHub</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="py-12 bg-black border-t border-gray-800/50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+                <p>&copy; <script>document.write(new Date().getFullYear())</script> John Althausen. All Rights Reserved.</p>
+                <p class="text-xs mt-2">Powered by motivation and a passion for technology.</p>
+            </div>
+        </footer>
+
+    </div> <div id="game-overlay">
         <div id="game-container">
             <h2 id="game-title">Cyber Guard</h2> <canvas id="gameCanvas"></canvas>
             <div id="score-display">Score: 0</div>
@@ -481,6 +567,118 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        // --- Loading Screen & Mask Transition Logic ---
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+        const loadingCanvas = document.getElementById('loadingCanvas');
+        const loadingCtx = loadingCanvas ? loadingCanvas.getContext('2d') : null;
+        let loadingParticles = [];
+        let loadingAnimationId;
+        const loadingParticleColor = "204, 164, 59"; // Gold color for loading
+
+        function setupLoadingAnimation() {
+            if (!loadingCanvas || !loadingCtx) return;
+            loadingCanvas.width = window.innerWidth;
+            loadingCanvas.height = window.innerHeight;
+            loadingParticles = [];
+            const numLoadingParticles = Math.floor((window.innerWidth * window.innerHeight) / 10000); // Denser
+            for (let i = 0; i < numLoadingParticles; i++) {
+                loadingParticles.push(new LoadingParticle());
+            }
+            animateLoadingParticles();
+        }
+
+        class LoadingParticle {
+             constructor() {
+                this.x = Math.random() * loadingCanvas.width;
+                this.y = Math.random() * loadingCanvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.baseOpacity = Math.random() * 0.4 + 0.2; // Slightly brighter base
+                this.currentOpacity = this.baseOpacity;
+                this.vx = (Math.random() - 0.5) * 0.3; // Slightly faster
+                this.vy = (Math.random() - 0.5) * 0.3;
+            }
+             update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                // Simple wrap around edges
+                if (this.x < 0) this.x = loadingCanvas.width;
+                if (this.x > loadingCanvas.width) this.x = 0;
+                if (this.y < 0) this.y = loadingCanvas.height;
+                if (this.y > loadingCanvas.height) this.y = 0;
+             }
+             draw() {
+                loadingCtx.beginPath();
+                loadingCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                // Make particles near center brighter
+                const dx = this.x - loadingCanvas.width / 2;
+                const dy = this.y - loadingCanvas.height / 2;
+                const distCenter = Math.sqrt(dx*dx + dy*dy);
+                const maxDist = Math.sqrt(Math.pow(loadingCanvas.width/2, 2) + Math.pow(loadingCanvas.height/2, 2));
+                this.currentOpacity = this.baseOpacity + (1 - distCenter / maxDist) * 0.4; 
+                loadingCtx.fillStyle = `rgba(${loadingParticleColor}, ${this.currentOpacity})`;
+                loadingCtx.fill();
+             }
+        }
+         function connectLoadingParticles() {
+            const connectionDist = 100; // Shorter connection distance for loading
+            for (let i = 0; i < loadingParticles.length; i++) {
+                for (let j = i + 1; j < loadingParticles.length; j++) {
+                    const dx = loadingParticles[i].x - loadingParticles[j].x;
+                    const dy = loadingParticles[i].y - loadingParticles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < connectionDist) {
+                        const lineOpacity = Math.min(0.5, (1 - distance / connectionDist) * 0.6); // Fainter lines
+                        if (lineOpacity > 0.01) {
+                            loadingCtx.beginPath();
+                            loadingCtx.moveTo(loadingParticles[i].x, loadingParticles[i].y);
+                            loadingCtx.lineTo(loadingParticles[j].x, loadingParticles[j].y);
+                            loadingCtx.strokeStyle = `rgba(${loadingParticleColor}, ${lineOpacity})`;
+                            loadingCtx.lineWidth = 0.4;
+                            loadingCtx.stroke();
+                        }
+                    }
+                }
+            }
+        }
+
+        function animateLoadingParticles() {
+            if (!loadingCtx || !loadingCanvas) return;
+            loadingCtx.clearRect(0, 0, loadingCanvas.width, loadingCanvas.height);
+            loadingParticles.forEach(p => { p.update(); p.draw(); });
+            connectLoadingParticles();
+            loadingAnimationId = requestAnimationFrame(animateLoadingParticles);
+        }
+
+        // Start loading animation immediately
+        setupLoadingAnimation();
+
+        // Sequence the loading screen removal and mask transition
+        setTimeout(() => {
+            if(loadingText) loadingText.classList.add('hidden'); // Start fading text first
+        }, 2200); // 2.2s
+
+        setTimeout(() => {
+            document.body.classList.add('loaded'); // Trigger mask transition
+            document.body.classList.remove('loading'); // Allow scrolling now
+            if(loadingOverlay) loadingOverlay.classList.add('hidden'); // Start fading overlay
+            
+            // Initialize main particle animation AFTER loading screen starts hiding
+             if (particleCanvas) {
+                 resizeParticleCanvas(); 
+                 animateParticles();  
+             }
+
+        }, 2700); // 2.7s start mask slightly after text fade
+
+        setTimeout(() => {
+            if(loadingOverlay) loadingOverlay.style.display = 'none'; // Remove overlay completely after fade+mask
+            cancelAnimationFrame(loadingAnimationId); // Stop loading animation
+        }, 3700); // 3.7s (Ensure overlay is gone after mask transition finishes)
+
+
+        // --- Main Particle Network Animation ---
         const particleCanvas = document.getElementById('secureMatrixCanvas');
         const particleCtx = particleCanvas ? particleCanvas.getContext('2d') : null; 
         let particleAnimationFrameId;
@@ -533,7 +731,7 @@
                 this.y = Math.random() * currentCanvasHeight; 
                 this.originalX = this.x; this.originalY = this.y;
                 this.size = Math.random() * 1.8 + 0.8; 
-                this.baseOpacity = Math.random() * 0.3 + 0.15; // Increased brightness
+                this.baseOpacity = Math.random() * 0.3 + 0.15; 
                 this.currentOpacity = this.baseOpacity;
                 this.vx = (Math.random() - 0.5) * 0.15; 
                 this.vy = (Math.random() - 0.5) * 0.15; 
@@ -550,7 +748,7 @@
                         const force = (particleMouse.radius - distanceToMouse) / particleMouse.radius; 
                         dxMouse = forceDirectionX * force * particleRepulsionStrength;
                         dyMouse = forceDirectionY * force * particleRepulsionStrength;
-                        this.currentOpacity = Math.min(0.9, this.baseOpacity + (1 - distanceToMouse / particleMouse.radius) * 0.7); // Increased max brightness
+                        this.currentOpacity = Math.min(0.9, this.baseOpacity + (1 - distanceToMouse / particleMouse.radius) * 0.7); 
                     } else { this.currentOpacity = this.baseOpacity; }
                 } else { this.currentOpacity = this.baseOpacity; }
                 const springForceX = (this.originalX - this.x) * 0.0015; 
@@ -591,12 +789,13 @@
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     if (distance < particleConnectionDistance) {
                         const avgNodeOpacity = (particles[i].currentOpacity + particles[j].currentOpacity) / 2;
-                        const lineOpacity = Math.min(avgNodeOpacity * 0.9, (1 - distance / particleConnectionDistance) * 0.8); // Increased brightness
+                        const lineOpacity = Math.min(avgNodeOpacity * 0.9, (1 - distance / particleConnectionDistance) * 0.8); 
                         if (lineOpacity > 0.02) { 
                             particleCtx.beginPath(); particleCtx.moveTo(particles[i].x, particles[i].y);
                             particleCtx.lineTo(particles[j].x, particles[j].y);
                             particleCtx.strokeStyle = `rgba(${particleGoldColorBase}, ${lineOpacity})`;
-                            particleCtx.lineWidth = 0.5; particleCtx.stroke();
+                            particleCtx.lineWidth = 0.3; 
+                            particleCtx.stroke();
                         }
                     }
                 }
@@ -616,14 +815,16 @@
             if (!particleCtx || !particleCanvas) return;
             particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height); 
             particles.forEach(p => { p.update(); p.draw(); });
-            connectParticles(); drawParticleCustomCursor(); 
+            connectParticles(); 
+            drawParticleCustomCursor(); 
             particleAnimationFrameId = requestAnimationFrame(animateParticles); 
         }
         
+        // --- Hidden Game Logic ---
         const gameOverlay = document.getElementById('game-overlay');
         const gameContainer = document.getElementById('game-container');
         const gameCanvas = document.getElementById('gameCanvas');
-        const gameCtx = gameCanvas.getContext('2d');
+        const gameCtx = gameCanvas ? gameCanvas.getContext('2d') : null; // Added null check
         const scoreDisplay = document.getElementById('score-display');
         const startGameButton = document.getElementById('start-game-button');
         const restartGameButton = document.getElementById('restart-game-button');
@@ -660,6 +861,7 @@
         let isTouching = false;
 
         function setupGameCanvasDimensions() {
+            if (!gameCanvas) return; // Added check
             const viewportWidth = window.innerWidth;
             const containerMaxWidthPx = 700; 
             const containerPercentage = 0.90; 
@@ -878,12 +1080,14 @@
         }
 
         function drawGame() {
+            if (!gameCtx || !gameCanvas) return; // Added check
             gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height); 
             player.draw();
             items.forEach(item => item.draw());
         }
 
         function initGame() {
+            if (!gameCanvas) return; // Added check
             gameOver = false;
             score = 0;
             gameSpeed = initialGameSpeed;
@@ -996,10 +1200,7 @@
             });
         }
         
-        if (particleCanvas) {
-            resizeParticleCanvas(); 
-            animateParticles();  
-        }
+        // Only initialize main particle animation after loading is done (handled in loading sequence)
         
         window.addEventListener('resize', () => {
             if (particleCanvas) { 
@@ -1009,11 +1210,6 @@
             }
             if (gameOverlay && gameOverlay.style.display === 'flex' && !gameOver) {
                 setupGameCanvasDimensions();
-                // Re-initialize game or adjust elements on resize while game is active
-                // For simplicity, current setup resizes canvas but might require restart
-                // To attempt continuation:
-                // player.y = Math.min(player.y, gameCanvas.height - player.height); 
-                // drawGame(); 
             }
         });
     });
