@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>John Althausen - Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"> 
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000; 
+            color: #D1D5DB; 
+            overflow-x: hidden; 
+        }
+
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        #secureMatrixCanvas { 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; 
+            pointer-events: auto; 
+            cursor: none; 
+        }
+
+        .content-z {
+            z-index: 1; 
+            position: relative;
+            pointer-events: none; 
+        }
+        
+        .content-z > * {
+            pointer-events: auto; 
+        }
+
+        .glassmorphic-panel-dark {
+            background: rgba(17, 24, 39, 0.65); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px); 
+            border: 1px solid rgba(55, 65, 81, 0.4); 
+            border-radius: 0.75rem; 
+            box-shadow: 0 8px 25px -10px rgba(0, 0, 0, 0.3);
+            min-height: 150px; 
+        }
+
+        .btn-primary-gold {
+            background-color: #CCA43B; 
+            color: #111827; 
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(204, 164, 59, 0.2);
+        }
+        .btn-primary-gold:hover {
+            background-color: #B8860B; 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 15px rgba(184, 134, 11, 0.3);
+        }
+
+        .btn-secondary-outline {
+            background-color: transparent;
+            color: #CCA43B; 
+            border: 2px solid #CCA43B;
+            font-weight: 600;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+        }
+        .btn-secondary-outline:hover {
+            background-color: #CCA43B;
+            color: #111827; 
+            transform: translateY(-2px); 
+        }
+        
+        .header-link {
+            color: #9CA3AF; 
+        }
+        .header-link:hover {
+            color: #CCA43B; 
+        }
+
+        .text-gold {
+            color: #CCA43B;
+        }
+        
+        .gradient-text-gold {
+            background: linear-gradient(to right, #DAA520, #B8860B); 
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
+        .section-placeholder {
+            min-height: 50vh; 
+            padding-top: 80px; 
+            padding-bottom: 40px; 
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4B5563; 
+        }
+
+        #game-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 10, 5, 0.95); 
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; 
+            font-family: 'Press Start 2P', cursive; 
+        }
+
+        #game-container {
+            background: linear-gradient(145deg, #081408, #002000); 
+            border: 2px solid #00FF00; 
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.5), 
+                        inset 0 0 10px rgba(0, 255, 0, 0.2);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            color: #00FF00; 
+            width: 90%;
+            max-width: 700px; 
+        }
+
+        #gameCanvas {
+            background-color: #000500; 
+            border: 1px solid #00A000; 
+            display: block; 
+            margin: 0 auto 20px auto; 
+            border-radius: 5px;
+        }
+        
+        .game-button {
+            background-color: #004d00; 
+            color: #00FF00; 
+            border: 1px solid #00FF00;
+            padding: 12px 22px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px; 
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
+            margin: 8px;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(0, 255, 0, 0.7);
+        }
+        .game-button:hover {
+            background-color: #00FF00; 
+            color: #002000; 
+            box-shadow: 0 0 18px rgba(0, 255, 0, 0.9);
+            transform: scale(1.05);
+        }
+         .game-button:active {
+            transform: scale(0.95);
+        }
+
+
+        #game-title {
+            font-size: 28px; 
+            margin-bottom: 20px;
+            text-shadow: 0 0 8px #00FF00;
+            color: #33FF33; 
+        }
+        #score-display {
+            font-size: 20px; 
+            margin-bottom: 20px;
+            color: #99FF99; 
+        }
+        #game-over-message {
+            font-size: 22px; 
+            color: #FF3333; 
+            text-shadow: 0 0 8px #FF0000;
+            margin-bottom: 15px;
+        }
+        #game-trigger { 
+            cursor: pointer;
+            user-select: none; 
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="fixed top-0 left-0 right-0 z-20 bg-black/70 backdrop-filter backdrop-blur-md border-b border-gray-800/50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="#hero" class="text-2xl font-bold text-white"> John <span class="text-gold">Althausen</span>
+                    </a>
+                </div>
+                <nav class="hidden md:flex md:items-center md:space-x-8">
+                    <a href="#about-me" class="header-link text-sm font-medium transition-colors">About Me</a>
+                    <a href="#experience" class="header-link text-sm font-medium transition-colors">Experience</a>
+                    <a href="#skills" class="header-link text-sm font-medium transition-colors">Skills</a>
+                    <a href="#projects" class="header-link text-sm font-medium transition-colors">Projects</a>
+                    <a href="#contact" class="header-link text-sm font-medium transition-colors">Contact</a>
+                </nav>
+                <div class="flex items-center space-x-3">
+                    <a href="#contact" class="btn-primary-gold py-2 px-4 rounded-md text-sm">Contact Me</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="hero" class="hero-section">
+        <canvas id="secureMatrixCanvas"></canvas> 
+        <div class="content-z container mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight text-gray-100">
+                John Althausen
+            </h1>
+            <p class="text-2xl md:text-3xl gradient-text-gold font-semibold mb-8 max-w-2xl mx-auto">
+                 Security <span id="game-trigger">Operations</span> Center Analyst (SOC Analyst)
+            </p>
+            <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-3xl mx-auto">
+                Motivated and diligent professional dedicated to continuous education and self-improvement. Proficient in leveraging Microsoft products and diverse computer software to enhance user experiences. Eager to contribute to team achievements through meticulous attention to detail and a strong work ethic.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="#experience" class="btn-primary-gold py-3 px-8 rounded-lg text-base w-full sm:w-auto">
+                    View My Experience
+                </a>
+                <a href="John Althausen Federal Resume.pdf" class="btn-secondary-outline py-3 px-8 rounded-lg text-base w-full sm:w-auto" target="_blank" rel="noopener noreferrer">
+                    Download Resume
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about-me" class="py-16 sm:py-24 bg-black relative z-10 section-placeholder">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
+                About <span class="text-gold">Me</span>
+            </h2>
+            <div class="glassmorphic-panel-dark p-6 sm:p-8 lg:p-10 max-w-3xl mx-auto">
+                <p class="text-gray-300 text-lg mb-4">
+                    I am a motivated and diligent professional dedicated to continuous education and self-improvement. Proficient in leveraging Microsoft products and diverse computer software to enhance user experiences, I am recognized for consistently surpassing expectations and providing exceptional support to staff.
+                </p>
+                <p class="text-gray-300 text-lg mb-4">
+                    My background includes achieving the top of my cybersecurity and digital forensics class during the National Cyber League Competition. I am skilled in utilizing tools for packet analysis, network traffic forensics, and ensuring system security. I am eager to contribute to team achievements through meticulous attention to detail, a strong work ethic, and exceptional organizational abilities.
+                </p>
+                <p class="text-gray-300 text-lg">
+                    With experience in help desk support and now as a Security Operations Center Analyst at Edgewater Federal Solutions, I am committed to continuous learning, personal growth, and striving for professional excellence in the cybersecurity field.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience" class="py-16 sm:py-24 bg-gray-950 relative z-10 section-placeholder">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
+                Professional <span class="text-gold">Experience</span>
+            </h2>
+            <div class="space-y-12">
+                <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                    <h3 class="text-2xl font-semibold text-gold mb-2">Security Operations Center Analyst</h3>
+                    <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Full-time)</p>
+                    <p class="text-sm text-gray-500 mb-1">Jun 2024 - Present</p>
+                    <p class="text-sm text-gray-500 mb-4">Oak Ridge, Tennessee, United States · Hybrid</p>
+                    <ul class="list-disc list-inside text-gray-400 space-y-2">
+                        <li>Monitor security events and alerts using SIEM tools (Splunk, Elasticsearch) and XDR platforms (Crowdstrike Falcon, Palo Alto Networks Cortex).</li>
+                        <li>Conduct vulnerability assessments and contribute to IT security policy enforcement.</li>
+                        <li>Analyze security incidents, perform data monitoring, and assist in incident response activities.</li>
+                        <li>Collaborate with team members to enhance security posture and maintain comprehensive IT documentation.</li>
+                        <li>Utilize skills in HSPD-12 compliance, security operations, and troubleshooting to protect organizational assets.</li>
+                        <li>Implement zero trust methodologies on network printers and other devices.</li>
+                    </ul>
+                </div>
+                <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                    <h3 class="text-2xl font-semibold text-gold mb-2">Help Desk Support</h3>
+                    <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Full-time)</p>
+                    <p class="text-sm text-gray-500 mb-1">Jul 2023 - Jun 2024 (1 yr)</p>
+                    <p class="text-sm text-gray-500 mb-4">On-site</p>
+                    <ul class="list-disc list-inside text-gray-400 space-y-2">
+                        <li>Provided exceptional customer service, addressing client concerns promptly and ensuring satisfaction.</li>
+                        <li>Diagnosed and resolved technical problems efficiently using critical thinking and analytical skills.</li>
+                        <li>Installed and configured computer hardware components and software applications.</li>
+                        <li>Administered Adobe software solutions, including installation, updates, and troubleshooting.</li>
+                        <li>Created and deployed Windows images for standardized workstation setups.</li>
+                        <li>Administered the Alloy ticketing system, promptly addressing and resolving user issues.</li>
+                        <li>Created updated Windows images integrated with the latest patches to mitigate security risks.</li>
+                        <li>Installed and administered CrowdStrike antivirus software.</li>
+                        <li>Mentored interns in imaging processes, security protocols, and networking fundamentals.</li>
+                        <li>Utilized skills in Proofpoint, Smart Cards, and IT security policies.</li>
+                    </ul>
+                </div>
+                <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                    <h3 class="text-2xl font-semibold text-gold mb-2">Information Science Specialist - Archivist Support / Help Desk Support</h3>
+                    <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Contract)</p>
+                    <p class="text-sm text-gray-500 mb-1">May 2023 - Jun 2023 (2 mos)</p>
+                    <p class="text-sm text-gray-500 mb-4">Oak Ridge, Tennessee, United States · On-site</p>
+                     <ul class="list-disc list-inside text-gray-400 space-y-2">
+                        <li>Provided technical support for information science and archival systems.</li>
+                        <li>Assisted users with help desk inquiries, troubleshooting specialized software and databases.</li>
+                        <li>Contributed to the maintenance and organization of digital archives.</li>
+                        <li>Applied skills in Proofpoint, IT security policies, and customer service.</li>
+                    </ul>
+                </div>
+                <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                    <h3 class="text-2xl font-semibold text-gold mb-2">IT Support Specialist Intern</h3>
+                    <p class="text-lg text-gray-300 mb-1">Edgewater Federal Solutions, Inc. (Part-time)</p>
+                    <p class="text-sm text-gray-500 mb-1">Feb 2023 - Apr 2023 (3 mos)</p>
+                    <p class="text-sm text-gray-500 mb-4">Tennessee, United States · On-site</p>
+                    <ul class="list-disc list-inside text-gray-400 space-y-2">
+                        <li>Gained hands-on experience in IT support, including hardware and software troubleshooting.</li>
+                        <li>Assisted with desktop imaging and deployment.</li>
+                        <li>Learned about network security protocols and practices.</li>
+                        <li>Developed interpersonal communication and problem-solving skills.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="py-16 sm:py-24 bg-black relative z-10 section-placeholder">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
+                Technical <span class="text-gold">Skills & Certifications</span>
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="glassmorphic-panel-dark p-6">
+                    <h3 class="text-xl font-semibold text-gold mb-3">Cybersecurity & SOC</h3>
+                    <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                        <li>Security Information and Event Management (SIEM): Splunk, Elasticsearch, Wazuh</li>
+                        <li>Extended Detection & Response (XDR): Palo Alto Networks Cortex</li>
+                        <li>Endpoint Security: Crowdstrike Falcon</li>
+                        <li>Vulnerability Assessment & Management</li>
+                        <li>Security Monitoring & Data Monitoring</li>
+                        <li>Network Packet Analysis: Wireshark, Network Miner, Tcpdump, Snort</li>
+                        <li>Zero Trust Implementation</li>
+                        <li>IT Security Policies & Procedures</li>
+                        <li>HSPD-12 Compliance</li>
+                        <li>Security Operations</li>
+                    </ul>
+                </div>
+                <div class="glassmorphic-panel-dark p-6">
+                    <h3 class="text-xl font-semibold text-gold mb-3">IT Support & Systems Admin</h3>
+                    <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                        <li>Help Desk & Ticketing Systems (Alloy)</li>
+                        <li>Windows Image Creation & Deployment</li>
+                        <li>Computer Hardware Installation & Troubleshooting</li>
+                        <li>Software Installation & Troubleshooting</li>
+                        <li>Adobe Administration</li>
+                        <li>Microsoft Products Proficiency</li>
+                        <li>DNS Server Management</li>
+                        <li>Secure Proxy Configuration</li>
+                        <li>Proofpoint Email Security</li>
+                        <li>Smart Card Technology</li>
+                        <li>Technical Documentation & IT Documentation</li>
+                    </ul>
+                </div>
+                <div class="glassmorphic-panel-dark p-6">
+                    <h3 class="text-xl font-semibold text-gold mb-3">Certifications</h3>
+                    <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                        <li>TestOut PC Pro Certification</li>
+                        <li>TestOut Security Pro Certification</li>
+                        <li>TestOut Network Pro Certification</li>
+                        <li>Pursuing CompTIA Security+</li>
+                    </ul>
+                    <h3 class="text-xl font-semibold text-gold mb-3 mt-4">Professional Skills</h3>
+                     <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                        <li>Problem Solving & Troubleshooting</li>
+                        <li>Customer Service</li>
+                        <li>Collaboration & Teamwork</li>
+                        <li>Interpersonal Communication</li>
+                        <li>Organization Skills</li>
+                        <li>Conflict Resolution</li>
+                        <li>Time Management</li>
+                        <li>Mentoring & Training</li>
+                    </ul>
+                     <h3 class="text-xl font-semibold text-gold mb-3 mt-4">Accomplishments</h3>
+                     <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                        <li>Top of class in National Cyber League Competition</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="py-16 sm:py-24 bg-gray-950 relative z-10 section-placeholder">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
+                My <span class="text-gold">Projects</span>
+            </h2>
+            <div class="text-center text-gray-400 mb-8">
+                <p>Details of specific personal or academic projects can be discussed further. My professional experience involves practical application of security measures and system administration.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                    <h3 class="text-2xl font-semibold text-gold mb-3">Home Lab Security & Network Setup</h3>
+                    <p class="text-gray-400 text-sm mb-4">
+                        Designed and implemented a comprehensive security and network infrastructure in a home lab environment. This included deploying Wazuh (XDR/SIEM) for threat detection, configuring a DNS server for ad/tracker blocking and custom filtering, and setting up a secure proxy for enhanced device security and network monitoring.
+                    </p>
+                    <p class="text-gray-500 text-xs mb-3">Technologies: Wazuh, DNS (Pi-hole or similar), Proxy Servers (e.g., Squid), Virtualization (VMware/VirtualBox), Linux OS</p>
+                </div>
+                <div class="glassmorphic-panel-dark p-6 sm:p-8">
+                    <h3 class="text-2xl font-semibold text-gold mb-3">Network Traffic Analysis & IDS Implementation</h3>
+                    <p class="text-gray-400 text-sm mb-4">
+                        Conducted in-depth network traffic analysis exercises using tools like Wireshark and Tcpdump to identify anomalies, detect potential intrusions, and understand network protocols. Implemented and configured Snort (IDS) to monitor network traffic for malicious activity based on defined rule sets during educational and personal projects.
+                    </p>
+                    <p class="text-gray-500 text-xs mb-3">Technologies: Wireshark, Snort, Tcpdump, Network Miner, Various Network Protocols</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-16 sm:py-24 bg-black relative z-10 section-placeholder"> 
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-12 sm:mb-16">
+                Get In <span class="text-gold">Touch</span>
+            </h2>
+            <div class="glassmorphic-panel-dark p-8 sm:p-10 max-w-xl mx-auto text-center">
+                <p class="text-lg text-gray-300 mb-6">
+                    I'm always open to discussing new opportunities, projects, or collaborations. Feel free to reach out!
+                </p>
+                <p class="text-xl text-gold font-semibold mb-2">
+                    <a href="mailto:JohnAlthausen@protonmail.com" class="hover:underline">JohnAlthausen@protonmail.com</a>
+                </p>
+                 <p class="text-lg text-gray-300 mb-6">
+                    <a href="tel:626-646-9723" class="hover:underline">(626) 646-9723</a>
+                </p>
+                <div class="flex justify-center space-x-6 mt-6">
+                    <a href="https://www.linkedin.com/in/johnalthausen/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gold transition-colors" aria-label="LinkedIn Profile">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clip-rule="evenodd"/></svg>
+                        <span class="sr-only">LinkedIn</span>
+                    </a>
+                    <a href="[your-github-url]" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gold transition-colors" aria-label="GitHub Profile">
+                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg>
+                        <span class="sr-only">GitHub</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-12 bg-black border-t border-gray-800/50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p>&copy; <script>document.write(new Date().getFullYear())</script> John Althausen. All Rights Reserved.</p>
+            <p class="text-xs mt-2">Powered by motivation and a passion for technology.</p>
+        </div>
+    </footer>
+
+    <div id="game-overlay">
+        <div id="game-container">
+            <h2 id="game-title">Cyber Guard</h2> <canvas id="gameCanvas" width="600" height="400"></canvas>
+            <div id="score-display">Score: 0</div>
+            <div id="game-over-message" style="display: none;">SYSTEM BREACH!</div> <button id="start-game-button" class="game-button">Initialize</button> <button id="restart-game-button" class="game-button" style="display: none;">Re-engage</button> <button id="close-game-button" class="game-button">Disengage</button> </div>
+    </div>
+
+    <script>
+        const particleCanvas = document.getElementById('secureMatrixCanvas');
+        const particleCtx = particleCanvas ? particleCanvas.getContext('2d') : null; 
+        let particleAnimationFrameId;
+
+        let particles = []; 
+        const particleConnectionDistance = 130; 
+        const particleMouseRadius = 160;      
+        const particleRepulsionStrength = 0.35; 
+        const particleGoldColorBase = "204, 164, 59"; 
+
+        const particleMouse = { x: undefined, y: undefined, radius: particleMouseRadius };
+        const particleCustomCursor = { x: undefined, y: undefined, outerRadius: 10, innerRadius: 3, outerColor: `rgba(${particleGoldColorBase}, 0.5)`, innerColor: `rgba(${particleGoldColorBase}, 0.9)`, lineWidth: 1.5 };
+
+        function calculateNumParticles() {
+            const area = window.innerWidth * window.innerHeight;
+            const calculatedParticles = Math.floor(area / 15000); 
+            return Math.max(30, Math.min(calculatedParticles, 100)); 
+        }
+
+        function resizeParticleCanvas() {
+            if (!particleCanvas) return;
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+            particles.length = 0; 
+            const newNumParticles = calculateNumParticles();
+            for (let i = 0; i < newNumParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        if (particleCanvas) {
+            particleCanvas.addEventListener('mousemove', (event) => {
+                const rect = particleCanvas.getBoundingClientRect(); 
+                particleMouse.x = event.clientX - rect.left; 
+                particleMouse.y = event.clientY - rect.top;  
+                particleCustomCursor.x = event.clientX - rect.left; 
+                particleCustomCursor.y = event.clientY - rect.top;
+            });
+            particleCanvas.addEventListener('mouseleave', () => {
+                particleMouse.x = undefined; particleMouse.y = undefined;
+                particleCustomCursor.x = undefined; particleCustomCursor.y = undefined;
+            });
+        }
+
+        class Particle { 
+            constructor() {
+                const currentCanvasWidth = particleCanvas ? particleCanvas.width : window.innerWidth;
+                const currentCanvasHeight = particleCanvas ? particleCanvas.height : window.innerHeight;
+                this.x = Math.random() * currentCanvasWidth; 
+                this.y = Math.random() * currentCanvasHeight; 
+                this.originalX = this.x; this.originalY = this.y;
+                this.size = Math.random() * 1.8 + 0.8; 
+                this.baseOpacity = Math.random() * 0.2 + 0.05; 
+                this.currentOpacity = this.baseOpacity;
+                this.vx = (Math.random() - 0.5) * 0.15; 
+                this.vy = (Math.random() - 0.5) * 0.15; 
+            }
+            update() {
+                let dxMouse = 0; let dyMouse = 0; 
+                if (particleMouse.x !== undefined) {
+                    const distMouseX = this.x - particleMouse.x;
+                    const distMouseY = this.y - particleMouse.y;
+                    const distanceToMouse = Math.sqrt(distMouseX * distMouseX + distMouseY * distMouseY);
+                    if (distanceToMouse < particleMouse.radius) {
+                        const forceDirectionX = distMouseX / distanceToMouse;
+                        const forceDirectionY = distMouseY / distanceToMouse;
+                        const force = (particleMouse.radius - distanceToMouse) / particleMouse.radius; 
+                        dxMouse = forceDirectionX * force * particleRepulsionStrength;
+                        dyMouse = forceDirectionY * force * particleRepulsionStrength;
+                        this.currentOpacity = Math.min(0.8, this.baseOpacity + (1 - distanceToMouse / particleMouse.radius) * 0.7); 
+                    } else { this.currentOpacity = this.baseOpacity; }
+                } else { this.currentOpacity = this.baseOpacity; }
+                const springForceX = (this.originalX - this.x) * 0.0015; 
+                const springForceY = (this.originalY - this.y) * 0.0015;
+                this.x += this.vx + dxMouse + springForceX;
+                this.y += this.vy + dyMouse + springForceY;
+                const currentCanvasWidth = particleCanvas ? particleCanvas.width : window.innerWidth;
+                const currentCanvasHeight = particleCanvas ? particleCanvas.height : window.innerHeight;
+                if (this.x < 0 || this.x > currentCanvasWidth) { 
+                    this.vx *= -0.5; this.x = Math.max(0, Math.min(this.x, currentCanvasWidth)); 
+                    if (this.x < -50 || this.x > currentCanvasWidth + 50) this.resetPosition();
+                }
+                if (this.y < 0 || this.y > currentCanvasHeight) {
+                    this.vy *= -0.5; this.y = Math.max(0, Math.min(this.y, currentCanvasHeight));
+                    if (this.y < -50 || this.y > currentCanvasHeight + 50) this.resetPosition();
+                }
+            }
+            resetPosition() {
+                const currentCanvasWidth = particleCanvas ? particleCanvas.width : window.innerWidth;
+                const currentCanvasHeight = particleCanvas ? particleCanvas.height : window.innerHeight;
+                this.x = Math.random() * currentCanvasWidth; this.y = Math.random() * currentCanvasHeight;
+                this.originalX = this.x; this.originalY = this.y;
+                this.vx = (Math.random() - 0.5) * 0.15; this.vy = (Math.random() - 0.5) * 0.15;
+            }
+            draw() {
+                if (!particleCtx) return;
+                particleCtx.beginPath();
+                particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                particleCtx.fillStyle = `rgba(${particleGoldColorBase}, ${this.currentOpacity})`;
+                particleCtx.fill();
+            }
+        }
+        function connectParticles() { 
+            if (!particleCtx) return;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) { 
+                    const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < particleConnectionDistance) {
+                        const avgNodeOpacity = (particles[i].currentOpacity + particles[j].currentOpacity) / 2;
+                        const lineOpacity = Math.min(avgNodeOpacity * 0.8, (1 - distance / particleConnectionDistance) * 0.6); 
+                        if (lineOpacity > 0.02) { 
+                            particleCtx.beginPath(); particleCtx.moveTo(particles[i].x, particles[i].y);
+                            particleCtx.lineTo(particles[j].x, particles[j].y);
+                            particleCtx.strokeStyle = `rgba(${particleGoldColorBase}, ${lineOpacity})`;
+                            particleCtx.lineWidth = 0.5; particleCtx.stroke();
+                        }
+                    }
+                }
+            }
+        }
+        function drawParticleCustomCursor() { 
+            if (!particleCtx || particleCustomCursor.x === undefined || particleCustomCursor.y === undefined) return;
+            particleCtx.beginPath();
+            particleCtx.arc(particleCustomCursor.x, particleCustomCursor.y, particleCustomCursor.outerRadius, 0, Math.PI * 2);
+            particleCtx.strokeStyle = particleCustomCursor.outerColor; particleCtx.lineWidth = particleCustomCursor.lineWidth;
+            particleCtx.stroke();
+            particleCtx.beginPath();
+            particleCtx.arc(particleCustomCursor.x, particleCustomCursor.y, particleCustomCursor.innerRadius, 0, Math.PI * 2);
+            particleCtx.fillStyle = particleCustomCursor.innerColor; particleCtx.fill();
+        }
+        function animateParticles() { 
+            if (!particleCtx || !particleCanvas) return;
+            particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height); 
+            particles.forEach(p => { p.update(); p.draw(); });
+            connectParticles(); drawParticleCustomCursor(); 
+            particleAnimationFrameId = requestAnimationFrame(animateParticles); 
+        }
+        
+        const gameOverlay = document.getElementById('game-overlay');
+        const gameContainer = document.getElementById('game-container');
+        const gameCanvas = document.getElementById('gameCanvas');
+        const gameCtx = gameCanvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score-display');
+        const startGameButton = document.getElementById('start-game-button');
+        const restartGameButton = document.getElementById('restart-game-button');
+        const closeGameButton = document.getElementById('close-game-button');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const gameTrigger = document.getElementById('game-trigger');
+
+        let score = 0;
+        let gameSpeed = 2.5; 
+        let initialGameSpeed = 2.5;
+        let maxGameSpeed = 8;
+        let speedIncrementTimer = 0;
+        let speedIncrementInterval = 480; 
+
+        let player;
+        let items = []; 
+        let gameLoopId;
+        let gameOver = false;
+
+        const playerWidth = 35; 
+        const playerHeight = 35;
+        const playerBaseSpeed = 4; 
+        let playerVelocityY = 0; 
+
+        const itemWidth = 30;
+        const itemHeight = 30;
+        
+        const firewallColor = '#00FF00'; 
+        const malwareColor = '#FF4136';   
+        const serverColor = '#0074D9';    
+
+        function drawFirewall(ctx, x, y, width, height, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x + width / 2, y);
+            ctx.lineTo(x + width, y + height / 3);
+            ctx.lineTo(x + width, y + height * 0.8);
+            ctx.quadraticCurveTo(x + width / 2, y + height, x, y + height * 0.8);
+            ctx.lineTo(x, y + height / 3);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(0,0,0,0.4)'; 
+            ctx.font = `${height * 0.5}px 'Press Start 2P'`; 
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('F', x + width / 2, y + height / 1.8); 
+        }
+
+        function drawMalware(ctx, x, y, width, height, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x + width / 2, y + height / 2, width / 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(x + width / 2, y + height / 2);
+                ctx.lineTo(
+                    x + width / 2 + Math.cos(angle) * (width / 1.8),
+                    y + height / 2 + Math.sin(angle) * (height / 1.8)
+                );
+                ctx.lineTo(
+                    x + width / 2 + Math.cos(angle + 0.2) * (width / 2.2),
+                    y + height / 2 + Math.sin(angle + 0.2) * (height / 2.2)
+                );
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        function drawServer(ctx, x, y, width, height, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, width, height);
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillRect(x + width * 0.2, y + height * 0.2, width * 0.1, height * 0.1);
+            ctx.fillRect(x + width * 0.2, y + height * 0.45, width * 0.1, height * 0.1);
+            ctx.fillStyle = '#FFFF00'; 
+            ctx.fillRect(x + width * 0.2, y + height * 0.7, width * 0.1, height * 0.1);
+        }
+
+
+        function Player(x, y) {
+            this.x = x;
+            this.y = y;
+            this.width = playerWidth;
+            this.height = playerHeight;
+            this.color = firewallColor;
+
+            this.draw = function() {
+                drawFirewall(gameCtx, this.x, this.y, this.width, this.height, this.color);
+            }
+
+            this.update = function() { 
+                this.y += playerVelocityY;
+                if (this.y < 0) {
+                    this.y = 0;
+                    playerVelocityY = 0; 
+                }
+                if (this.y + this.height > gameCanvas.height) {
+                    this.y = gameCanvas.height - this.height;
+                    playerVelocityY = 0; 
+                }
+            }
+        }
+
+        function Item(x, y, type) {
+            this.x = x;
+            this.y = y;
+            this.width = itemWidth;
+            this.height = itemHeight;
+            this.type = type; 
+            this.color = type === 'malware' ? malwareColor : serverColor;
+
+            this.draw = function() {
+                if (this.type === 'malware') {
+                    drawMalware(gameCtx, this.x, this.y, this.width, this.height, this.color);
+                } else {
+                    drawServer(gameCtx, this.x, this.y, this.width, this.height, this.color);
+                }
+            }
+
+            this.update = function() {
+                this.x -= gameSpeed;
+            }
+        }
+
+        function spawnItem() {
+            const type = Math.random() < 0.60 ? 'malware' : 'server'; 
+            let itemY;
+            if (type === 'server') {
+                itemY = (Math.random() < 0.5) ? itemHeight * 0.5 : gameCanvas.height - itemHeight * 1.5;
+            } else { 
+                itemY = Math.random() * (gameCanvas.height - itemHeight);
+            }
+            items.push(new Item(gameCanvas.width, itemY, type));
+        }
+        
+        let spawnTimer = 0;
+        let spawnInterval = 100; 
+
+        const keysPressed = {
+            ArrowUp: false,
+            ArrowDown: false,
+            w: false,
+            s: false
+        };
+
+        function handlePlayerMovement() {
+            playerVelocityY = 0; 
+            if (keysPressed.ArrowUp || keysPressed.w) {
+                playerVelocityY = -playerBaseSpeed;
+            }
+            if (keysPressed.ArrowDown || keysPressed.s) {
+                playerVelocityY = playerBaseSpeed;
+            }
+        }
+
+
+        function updateGame() {
+            if (gameOver) return;
+
+            handlePlayerMovement(); 
+            player.update(); 
+
+            spawnTimer++;
+            if (spawnTimer >= spawnInterval) {
+                spawnItem();
+                spawnTimer = 0;
+                if (gameSpeed > initialGameSpeed + 1.5 && spawnInterval > 50) { 
+                    spawnInterval -= 3;
+                }
+            }
+
+            for (let i = items.length - 1; i >= 0; i--) {
+                items[i].update();
+                if (
+                    player.x < items[i].x + items[i].width &&
+                    player.x + player.width > items[i].x &&
+                    player.y < items[i].y + items[i].height &&
+                    player.y + player.height > items[i].y
+                ) {
+                    if (items[i].type === 'malware') {
+                        score++;
+                        scoreDisplay.textContent = 'Score: ' + score;
+                        items.splice(i, 1); 
+                    } else { 
+                        gameOver = true;
+                        gameOverMessage.style.display = 'block';
+                        restartGameButton.style.display = 'inline-block';
+                        startGameButton.style.display = 'none';
+                        break; 
+                    }
+                } else if (items[i].x + items[i].width < 0) {
+                    if (items[i].type === 'malware') { 
+                        gameOver = true; 
+                        gameOverMessage.textContent = 'MALWARE BREACH!'; 
+                        gameOverMessage.style.display = 'block';
+                        restartGameButton.style.display = 'inline-block';
+                        startGameButton.style.display = 'none';
+                        break; 
+                    }
+                    items.splice(i, 1); 
+                }
+            }
+            
+            speedIncrementTimer++;
+            if (speedIncrementTimer >= speedIncrementInterval && gameSpeed < maxGameSpeed) {
+                gameSpeed += 0.3; 
+                speedIncrementTimer = 0;
+            }
+
+            drawGame();
+            if (!gameOver) {
+                gameLoopId = requestAnimationFrame(updateGame);
+            }
+        }
+
+        function drawGame() {
+            gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height); 
+            player.draw();
+            items.forEach(item => item.draw());
+        }
+
+        function initGame() {
+            gameOver = false;
+            score = 0;
+            gameSpeed = initialGameSpeed;
+            speedIncrementTimer = 0;
+            spawnTimer = 0;
+            spawnInterval = 100; 
+            playerVelocityY = 0; 
+
+            scoreDisplay.textContent = 'Score: ' + score;
+            items = [];
+            player = new Player(50, gameCanvas.height / 2 - playerHeight / 2); 
+            
+            gameOverMessage.textContent = 'SYSTEM BREACH!'; 
+            gameOverMessage.style.display = 'none';
+            startGameButton.style.display = 'none';
+            restartGameButton.style.display = 'none';
+
+            if (gameLoopId) cancelAnimationFrame(gameLoopId); 
+            gameLoopId = requestAnimationFrame(updateGame);
+        }
+        
+        function showGame() {
+            gameOverlay.style.display = 'flex';
+            startGameButton.style.display = 'inline-block';
+            restartGameButton.style.display = 'none';
+            gameOverMessage.style.display = 'none';
+            for (let key in keysPressed) keysPressed[key] = false;
+        }
+
+        function hideGame() {
+            gameOverlay.style.display = 'none';
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+            }
+            gameOver = true; 
+        }
+
+        if (startGameButton) startGameButton.addEventListener('click', initGame);
+        if (restartGameButton) restartGameButton.addEventListener('click', initGame);
+        if (closeGameButton) closeGameButton.addEventListener('click', hideGame);
+
+        document.addEventListener('keydown', (e) => {
+            if (gameOverlay.style.display !== 'flex' || gameOver) return;
+            if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') keysPressed.ArrowUp = true;
+            if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') keysPressed.ArrowDown = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            if (gameOverlay.style.display !== 'flex') return;
+            if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') keysPressed.ArrowUp = false;
+            if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') keysPressed.ArrowDown = false;
+        });
+
+        let clickCount = 0;
+        let clickTimer = null;
+        if (gameTrigger) {
+            gameTrigger.addEventListener('click', () => {
+                clickCount++;
+                if (clickCount === 1) {
+                    clickTimer = setTimeout(() => {
+                        clickCount = 0; 
+                    }, 500);
+                } else if (clickCount === 3) {
+                    clearTimeout(clickTimer);
+                    clickCount = 0;
+                    showGame();
+                }
+            });
+        }
+        
+        window.addEventListener('load', () => {
+            if (particleCanvas) {
+                 resizeParticleCanvas(); 
+                 animateParticles();  
+            }
+        });
+         window.addEventListener('resize', () => {
+            if (particleCanvas) { 
+                cancelAnimationFrame(particleAnimationFrameId); 
+                resizeParticleCanvas(); 
+                animateParticles(); 
+            }
+        });
+
+    </script>
+
+</body>
+</html>
